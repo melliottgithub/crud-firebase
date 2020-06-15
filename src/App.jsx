@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { firebase } from "./firebase";
+import { firestore } from "firebase";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -44,6 +45,16 @@ function App() {
     console.log(task);
   };
 
+  const deleteHandler = async (id) => {
+    try {
+      const db = firebase.firestore()
+      await db.collection('tasks').doc(id).delete()
+
+      const arrayFilter = tasks.filter(item => item.id !== id)
+      setTasks(arrayFilter)
+    } catch (error) {}
+  };
+
   return (
     <div className="container mt-3">
       <div className="row">
@@ -52,7 +63,10 @@ function App() {
             {tasks.map((item) => (
               <li className="list-group-item" key={item.id}>
                 {item.name}
-                <button className="btn btn-danger btn-sm float-right">
+                <button
+                  onClick={() => deleteHandler(item.id)}
+                  className="btn btn-danger btn-sm float-right"
+                >
                   Delete
                 </button>
                 <button className="btn btn-warning mr-2 btn-sm float-right">
@@ -64,7 +78,7 @@ function App() {
         </div>
         <div className="col-md-6">
           <h3>Form</h3>
-          
+
           <form onSubmit={addHandler}>
             <input
               type="text"
