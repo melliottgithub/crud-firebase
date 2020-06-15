@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { firebase } from "./firebase";
-import { firestore } from "firebase";
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [task, setTask] = useState("");
+  const [modeEdit, setModeEdit] = useState(false);
+  const [id, setId] = useState('');
 
   useEffect(() => {
     const getData = async () => {
@@ -26,7 +27,6 @@ function App() {
   const addHandler = async (e) => {
     e.preventDefault();
     if (!task.trim()) {
-      alert("nada");
       return;
     }
     try {
@@ -47,12 +47,27 @@ function App() {
 
   const deleteHandler = async (id) => {
     try {
-      const db = firebase.firestore()
-      await db.collection('tasks').doc(id).delete()
+      const db = firebase.firestore();
+      await db.collection("tasks").doc(id).delete();
 
-      const arrayFilter = tasks.filter(item => item.id !== id)
-      setTasks(arrayFilter)
+      const arrayFilter = tasks.filter((item) => item.id !== id);
+      setTasks(arrayFilter);
     } catch (error) {}
+  };
+
+  const actEditHandler = (item) => {
+    setModeEdit(true);
+    setTask(item.name);
+    setId(item.id);
+  };
+
+  const editHandler = async (e) => {
+    e.preventDefault();
+    try {
+      
+    } catch (error) {
+      
+    }
   };
 
   return (
@@ -69,7 +84,10 @@ function App() {
                 >
                   Delete
                 </button>
-                <button className="btn btn-warning mr-2 btn-sm float-right">
+                <button
+                  onClick={() => actEditHandler(item)}
+                  className="btn btn-warning mr-2 btn-sm float-right"
+                >
                   Edit
                 </button>
               </li>
@@ -77,9 +95,9 @@ function App() {
           </ul>
         </div>
         <div className="col-md-6">
-          <h3>Form</h3>
+          <h3>{modeEdit ? "Edit Task" : "Add Task"}</h3>
 
-          <form onSubmit={addHandler}>
+          <form onSubmit={modeEdit ? editHandler : addHandler}>
             <input
               type="text"
               placeholder="Enter task"
@@ -87,8 +105,15 @@ function App() {
               onChange={(e) => setTask(e.target.value)}
               value={task}
             />
-            <button type="submit" className="btn btn-dark btn-block">
-              Add
+            <button
+              type="submit"
+              className={
+                modeEdit
+                  ? "btn btn-warning btn-block"
+                  : "btn btn-dark btn-block"
+              }
+            >
+              {modeEdit ? "Edit" : "Add"}
             </button>
           </form>
         </div>
