@@ -3,6 +3,7 @@ import { firebase } from "./firebase";
 
 function App() {
   const [tasks, setTasks] = useState([]);
+  const [task, setTask] = useState("");
 
   useEffect(() => {
     const getData = async () => {
@@ -21,17 +22,62 @@ function App() {
     getData();
   }, []);
 
+  const addHandler = async (e) => {
+    e.preventDefault();
+    if (!task.trim()) {
+      alert("nada");
+      return;
+    }
+    try {
+      const db = firebase.firestore();
+      const newTask = {
+        name: task,
+        date: Date.now(),
+      };
+      const data = await db.collection("tasks").add(newTask);
+      setTasks([...tasks, { ...newTask, id: data.id }]);
+      setTask("");
+    } catch (error) {
+      alert("otra vez");
+    }
+
+    console.log(task);
+  };
+
   return (
     <div className="container mt-3">
       <div className="row">
         <div className="col-md-6">
           <ul className="list-group">
             {tasks.map((item) => (
-              <li className="list-group-item" key={item.id}>{item.name}</li>
+              <li className="list-group-item" key={item.id}>
+                {item.name}
+                <button className="btn btn-danger btn-sm float-right">
+                  Delete
+                </button>
+                <button className="btn btn-warning mr-2 btn-sm float-right">
+                  Edit
+                </button>
+              </li>
             ))}
           </ul>
         </div>
-        <div className="col-md-6">Form</div>
+        <div className="col-md-6">
+          <h3>Form</h3>
+          
+          <form onSubmit={addHandler}>
+            <input
+              type="text"
+              placeholder="Enter task"
+              className="form-control mb-2"
+              onChange={(e) => setTask(e.target.value)}
+              value={task}
+            />
+            <button type="submit" className="btn btn-dark btn-block">
+              Add
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
