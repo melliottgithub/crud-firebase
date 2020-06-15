@@ -6,6 +6,7 @@ function App() {
   const [task, setTask] = useState("");
   const [edit, setEdit] = useState(false);
   const [id, setId] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -27,6 +28,8 @@ function App() {
   const addHandler = async (e) => {
     e.preventDefault();
     if (!task.trim()) {
+      setError("Add a task before submitting");
+
       return;
     }
     try {
@@ -42,7 +45,7 @@ function App() {
         .add({ name: task, date: Date.now() });
 
       setTasks([...tasks, { id: data.id, ...newTask }]);
-
+      setError(null);
       setTask("");
     } catch (error) {}
   };
@@ -66,6 +69,8 @@ function App() {
   const editHandler = async (e) => {
     e.preventDefault();
     if (!task.trim()) {
+      setError("Add a task before submitting");
+
       return;
     }
     try {
@@ -80,6 +85,7 @@ function App() {
       setEdit(false);
       setId("");
       setTask("");
+      setError(null)
     } catch (error) {}
   };
 
@@ -87,19 +93,23 @@ function App() {
     <div className="container mt-3">
       <div className="row">
         <div className="col-md-6">
-          <h3>{edit ? "Editing Task List" : "Task list"}</h3>
+          <h3>{edit ? "Editing Grocery List" : "Grocery list"}</h3>
           <ul className="list-group">
             {tasks.map((item) => (
               <li className="list-group-item" key={item.id}>
                 {item.name}
                 <button
-                  onClick={() => deleteHandler(item.id)}
-                  className="btn btn-danger btn-sm float-right"
+                  onClick={edit ? null : () => deleteHandler(item.id)}
+                  className={
+                    edit
+                      ? "btn btn-danger btn-sm float-right disabled"
+                      : "btn btn-danger btn-sm float-right"
+                  }
                 >
                   Delete
                 </button>
                 <button
-                  onClick={() => actEditHandler(item)}
+                  onClick={edit ? null :() => actEditHandler(item)}
                   className="btn btn-warning mr-2 btn-sm float-right"
                 >
                   Edit
@@ -109,12 +119,17 @@ function App() {
           </ul>
         </div>
         <div className="col-md-6">
-          <h3>{edit ? "Edit Task" : "Add Task"}</h3>
+          <h3>{edit ? "Edit item" : "Add item"}</h3>
 
           <form onSubmit={edit ? editHandler : addHandler}>
+            {error ? (
+              <span className="text-danger">
+                Write something before submitting.
+              </span>
+            ) : null}
             <input
               type="text"
-              placeholder="Enter task"
+              placeholder="Enter item"
               className="form-control mb-2"
               onChange={(e) => setTask(e.target.value)}
               value={task}
@@ -125,7 +140,7 @@ function App() {
                 edit ? "btn btn-warning btn-block" : "btn btn-dark btn-block"
               }
             >
-              {edit ? "Edit" : "Add"}
+              {edit ? "Submit Edit" : "Add"}
             </button>
           </form>
         </div>
